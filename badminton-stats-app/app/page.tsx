@@ -14,16 +14,12 @@ import {
   type Session,
 } from "@supabase/supabase-js";
 import { supabase } from "@/lib/supabase";
-import {
-  GAMES_TABLE,
-  PLAYER_STORAGE_MODE,
-  USERS_TABLE,
-} from "@/lib/app-config";
+import { GAMES_TABLE } from "@/lib/app-config";
 
 type Tab = "home" | "match" | "stats";
 
 type Player = {
-  id: string | number;
+  id: string;
   name: string;
 };
 
@@ -392,16 +388,24 @@ function MatchEntry({ onSaved }: { onSaved: () => void }) {
       setLoadingPlayers(true);
 
       const { data, error: playersError } = await supabase
-        .from(USERS_TABLE)
+        .from("users")
         .select("id, name")
-        .order("name");
+        .order("name", { ascending: true });
 
       if (!active) return;
 
       if (playersError) {
-        setError(`Kunne ikke hente spillere: ${playersError.message}`);
+        setError(`Kunne ikke hente spillere fra users: ${playersError.message}`);
+        setPlayers([]);
       } else {
-        setPlayers((data ?? []) as Player[]);
+        const loadedPlayers = (data ?? []) as Player[];
+        setPlayers(loadedPlayers);
+
+        if (loadedPlayers.length === 0) {
+          setError(
+            "Ingen brugere blev hentet fra users-tabellen. Kontrollér at tabellen indeholder brugere, og at authenticated-brugere har SELECT-adgang via RLS."
+          );
+        }
       }
 
       setLoadingPlayers(false);
@@ -551,10 +555,10 @@ function MatchEntry({ onSaved }: { onSaved: () => void }) {
       const newMatchNumber = latestMatchNumber + 1;
       const newMatchId = crypto.randomUUID();
 
-      const storedPlayer1 =
-        PLAYER_STORAGE_MODE === "id" ? player1.id : player1.name;
-      const storedPlayer2 =
-        PLAYER_STORAGE_MODE === "id" ? player2.id : player2.name;
+      // player_1 og player_2 gemmes ALTID som users.id (UUID).
+      // Navnet bruges kun som displaytekst i dropdown og scorefelter.
+      const storedPlayer1 = player1.id;
+      const storedPlayer2 = player2.id;
 
       const rows = completedSets.map((set) => ({
         id: crypto.randomUUID(),

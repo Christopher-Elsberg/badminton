@@ -9,4 +9,4 @@ export const MATCH_ID_COLUMN = "match_id";
  * "name" = games_database.player_1/player_2 stores e.g. "Niels".
  * "id"   = games_database.player_1/player_2 stores users.id.
  */
-export const PLAYER_STORAGE_MODE: "name" | "id" = "name";
+export const PLAYER_STORAGE_MODE: "name" | "id" = "id";

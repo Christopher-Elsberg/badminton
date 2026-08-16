@@ -592,3 +592,33 @@ button:disabled {
     min-width: 0;
   }
 }
+/* =====================================================
+   BADMINTON LOGO
+===================================================== */
+
+.login-logo {
+  display: block;
+  width: 280px;
+  max-width: 80vw;
+  height: auto;
+  margin: 0 auto 20px auto;
+  object-fit: contain;
+}
+
+.header-logo {
+  width: 72px;
+  height: 72px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+@media (max-width: 600px) {
+  .login-logo {
+    width: 230px;
+  }
+
+  .header-logo {
+    width: 54px;
+    height: 54px;
+  }
+}

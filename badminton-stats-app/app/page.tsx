@@ -180,19 +180,17 @@ export default function Page() {
       <header className="header">
         <div className="page header-inner">
           <div className="brand">
-            <div className="brand-icon">
             <Image
-  src="/Badminton-logo.png"
-  alt="Christopher & Niels Badmintonklub"
-  width={320}
-  height={320}
-  priority
-  className="login-logo"
-/>
-            </div>
+              src="/Badminton-logo.png"
+              alt="Christopher & Niels Badmintonklub"
+              width={72}
+              height={72}
+              priority
+              className="header-logo"
+            />
             <div>
               <h1>Badminton Stats</h1>
-              <p>Match logger & statistik</p>
+              <p>Christopher & Niels Badmintonklub</p>
             </div>
           </div>
 
@@ -289,7 +287,14 @@ function LoginScreen() {
     <main className="login-page">
       <div className="login-box">
         <div className="login-heading">
-          <div className="login-icon">🏸</div>
+          <Image
+            src="/Badminton-logo.png"
+            alt="Christopher & Niels Badmintonklub"
+            width={320}
+            height={320}
+            priority
+            className="login-logo"
+          />
           <h1>Badminton Stats</h1>
           <p>Log ind for at registrere kampe og se statistikken.</p>
         </div>

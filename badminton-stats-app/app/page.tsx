@@ -182,7 +182,7 @@ export default function Page() {
           <div className="brand">
             <div className="brand-icon">
             <Image
-  src="/badminton-logo.png"
+  src="/Badminton-logo.png"
   alt="Christopher & Niels Badmintonklub"
   width={320}
   height={320}

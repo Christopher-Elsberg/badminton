@@ -560,118 +560,140 @@ function Statistics() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  async function loadStats() {
-    setLoading(true);
-    setError("");
+ async function loadStats() {
 
-    const { data, error } = await supabase.functions.invoke("badminton-stats");
+  setLoading(true);
+  setError("");
+
+  try {
+
+    const {
+      data,
+      error,
+    } = await supabase.functions.invoke(
+      "badminton-stats"
+    );
+
 
     if (error) {
-      setError(`Kunne ikke hente statistik: ${error.message}`);
+
+      console.error(
+        "Edge Function error:",
+        error
+      );
+
+
+      // ---------------------------------------------
+      // Functionen svarede, men med 4xx / 5xx
+      // ---------------------------------------------
+
+      if (
+        error instanceof FunctionsHttpError
+      ) {
+
+        try {
+
+          const errorBody =
+            await error.context.json();
+
+
+          console.error(
+            "Backend response:",
+            errorBody
+          );
+
+
+          setError(
+            errorBody?.error
+              ? `Kunne ikke hente statistik: ${errorBody.error}`
+              : `Kunne ikke hente statistik: ${JSON.stringify(errorBody)}`
+          );
+
+        } catch {
+
+          setError(
+            `Kunne ikke hente statistik: ${error.message}`
+          );
+
+        }
+
+      }
+
+      // ---------------------------------------------
+      // Problem mellem Supabase relay og function
+      // ---------------------------------------------
+
+      else if (
+        error instanceof FunctionsRelayError
+      ) {
+
+        setError(
+          `Supabase relay fejl: ${error.message}`
+        );
+
+      }
+
+      // ---------------------------------------------
+      // Browseren kunne slet ikke nå functionen
+      // ---------------------------------------------
+
+      else if (
+        error instanceof FunctionsFetchError
+      ) {
+
+        setError(
+          `Kunne ikke kontakte Edge Function: ${error.message}`
+        );
+
+      }
+
+      else {
+
+        setError(
+          `Kunne ikke hente statistik: ${error.message}`
+        );
+
+      }
+
+
       setLoading(false);
+
       return;
+
     }
 
-    setStats(data as StatsResponse);
-    setLoading(false);
-  }
 
-  useEffect(() => {
-    loadStats();
-  }, []);
-
-  if (loading) {
-    return <div className="center-status">Beregner statistik…</div>;
-  }
-
-  if (error) {
-    return (
-      <section>
-        <div className="section-title">
-          <h2>Statistik</h2>
-        </div>
-        <div className="alert alert-error">{error}</div>
-        <button className="btn" onClick={loadStats}>
-          Prøv igen
-        </button>
-      </section>
+    console.log(
+      "Statistics response:",
+      data
     );
+
+
+    setStats(
+      data as StatsResponse
+    );
+
+
+  } catch (err) {
+
+    console.error(
+      "Unexpected stats error:",
+      err
+    );
+
+
+    setError(
+      err instanceof Error
+        ? err.message
+        : String(err)
+    );
+
+  } finally {
+
+    setLoading(false);
+
   }
 
-  if (!stats) return null;
-
-  const selected = season === "overall" ? stats.overall : stats.seasons[season];
-
-  if (!selected) {
-    return <div className="alert alert-error">Der er ingen statistik for den valgte sæson.</div>;
-  }
-
-  return (
-    <section>
-      <div className="toolbar">
-        <div className="section-title" style={{ marginBottom: 0 }}>
-          <h2>Statistik</h2>
-          <p>Data beregnet af Supabase Edge Function.</p>
-        </div>
-
-        <div className="header-actions">
-          <div className="field">
-            <label htmlFor="season">Sæson</label>
-            <select
-              id="season"
-              className="select"
-              value={season}
-              onChange={(event) => setSeason(event.target.value)}
-            >
-              <option value="overall">Alle sæsoner</option>
-              {stats.available_seasons.map((year) => (
-                <option key={year} value={String(year)}>
-                  {year}
-                </option>
-              ))}
-            </select>
-          </div>
-          <button className="btn" onClick={loadStats} aria-label="Opdater statistik">
-            ↻ Opdater
-          </button>
-        </div>
-      </div>
-
-      <div className="summary-grid">
-        <SummaryCard label="Kampe" value={selected.matches} />
-        <SummaryCard label="Færdige kampe" value={selected.completed_matches} />
-        <SummaryCard label="Sæt" value={selected.sets} />
-        <SummaryCard label="Sæson" value={season === "overall" ? "All time" : season} />
-      </div>
-
-      <div className="player-grid">
-        {Object.entries(selected.players).map(([name, playerStats]) => (
-          <PlayerStatsCard key={name} name={name} stats={playerStats} />
-        ))}
-      </div>
-
-      <div className="panel recent">
-        <h3>Seneste kampe</h3>
-        {[...selected.match_results]
-          .reverse()
-          .slice(0, 10)
-          .map((match) => (
-            <div className="match-row" key={`${match.match_id}-${match.date}`}>
-              <div>
-                <strong>Kamp #{match.match_id}</strong>
-                <div className="muted" style={{ fontSize: 12, marginTop: 3 }}>
-                  {match.date}
-                </div>
-              </div>
-              <div className={match.winner ? "winner" : "muted"}>
-                {match.winner ? `🏆 ${match.winner}` : "Ingen vinder"}
-              </div>
-            </div>
-          ))}
-        {selected.match_results.length === 0 && <div className="muted">Ingen kampe endnu.</div>}
-      </div>
-    </section>
-  );
 }
 
 function SummaryCard({ label, value }: { label: string; value: string | number }) {

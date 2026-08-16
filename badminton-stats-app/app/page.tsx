@@ -180,7 +180,16 @@ export default function Page() {
       <header className="header">
         <div className="page header-inner">
           <div className="brand">
-            <div className="brand-icon">🏸</div>
+            <div className="brand-icon">
+            <Image
+  src="/badminton-logo.png"
+  alt="Christopher & Niels Badmintonklub"
+  width={320}
+  height={320}
+  priority
+  className="login-logo"
+/>
+            </div>
             <div>
               <h1>Badminton Stats</h1>
               <p>Match logger & statistik</p>

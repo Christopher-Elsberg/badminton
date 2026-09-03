@@ -1,9 +1,74 @@
-import type { Metadata } from "next";
+import type {
+  Metadata,
+  Viewport,
+} from "next";
+
 import "./globals.css";
 
+import ServiceWorkerRegistration from "./ServiceWorkerRegistration";
+
 export const metadata: Metadata = {
-  title: "Badminton Stats",
-  description: "Badminton match logger and statistics dashboard",
+  title: {
+    default: "Badminton Stats",
+    template: "%s | Badminton Stats",
+  },
+
+  description:
+    "Badminton match logger og statistik",
+
+  applicationName:
+    "Badminton Stats",
+
+  manifest:
+    "/manifest.webmanifest",
+
+  icons: {
+    icon: [
+      {
+        url: "/favicon-32.png",
+        sizes: "32x32",
+        type: "image/png",
+      },
+
+      {
+        url: "/icon-192.png",
+        sizes: "192x192",
+        type: "image/png",
+      },
+    ],
+
+    apple: [
+      {
+        url: "/apple-touch-icon.png",
+        sizes: "180x180",
+        type: "image/png",
+      },
+    ],
+  },
+
+  appleWebApp: {
+    capable: true,
+
+    title:
+      "Badminton Stats",
+
+    statusBarStyle:
+      "black-translucent",
+  },
+
+  formatDetection: {
+    telephone: false,
+  },
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+
+  initialScale: 1,
+
+  viewportFit: "cover",
+
+  themeColor: "#07111f",
 };
 
 export default function RootLayout({
@@ -13,20 +78,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="da">
-      <body>{children}</body>
+      <body>
+        <ServiceWorkerRegistration />
+
+        {children}
+      </body>
     </html>
   );
-}
-"use client";
-
-import { useEffect } from "react";
-
-export default function ServiceWorkerRegistration() {
-  useEffect(() => {
-    if ("serviceWorker" in navigator) {
-      navigator.serviceWorker.register("/sw.js");
-    }
-  }, []);
-
-  return null;
 }
